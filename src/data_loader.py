@@ -17,9 +17,13 @@ class DataLoader:
 
     def load_cve_data(self, filepath: str) -> pd.DataFrame:
         """加载CVE漏洞数据"""
-        df = pd.read_csv(filepath)
+        df = pd.read_csv(filepath, low_memory=False)
         df['publishedDate'] = pd.to_datetime(df['publishedDate'], errors='coerce')
         df['year'] = df['publishedDate'].dt.year
+        if 'v3_base_score' in df.columns:
+            df['baseScore'] = df['v3_base_score']
+        if 'v3_base_severity' in df.columns:
+            df['baseSeverity'] = df['v3_base_severity']
         self._cve_data = df
         return df
 

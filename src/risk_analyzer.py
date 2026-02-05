@@ -96,17 +96,20 @@ class RiskAnalyzer:
 
     def identify_high_risk_components(self, threshold: float = 8.0) -> List[Dict]:
         """识别高风险组件"""
+        cpe_cols = ['cpe23Uri', 'vendor', 'product']
+        if 'version' in self.cpe_data.columns:
+            cpe_cols.append('version')
         merged = self.junction_data.merge(self.cve_data, on='cveId', how='left')
-        merged = merged.merge(self.cpe_data[['cpe23Uri', 'vendor', 'product', 'version']], on='cpe23Uri', how='left')
+        merged = merged.merge(self.cpe_data[cpe_cols], on='cpe23Uri', how='left')
 
-        high_risk = merged[merged['baseScore'] >= threshold]
+        high_risk = merged[merged['baseScore'] >= threshold].head(500)
 
         components = []
         for _, row in high_risk.iterrows():
             components.append({
                 'vendor': row.get('vendor', 'unknown'),
                 'product': row.get('product', 'unknown'),
-                'version': row.get('version', '*'),
+                'version': row.get('version', '*') if 'version' in row else '*',
                 'cve_id': row['cveId'],
                 'score': row['baseScore'],
                 'severity': row.get('baseSeverity', 'UNKNOWN')
