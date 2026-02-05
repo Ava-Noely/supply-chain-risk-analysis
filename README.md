@@ -48,6 +48,3 @@ python src/main.py --data ./data
 - matplotlib
 - seaborn
 
-## 许可证
-
-MIT License
